@@ -1,0 +1,151 @@
+{
+  "kind": "coverage_report",
+  "version": "1.0",
+  "generatedAt": "2026-02-17T17:06:16.498Z",
+  "sources": {
+    "buildRequest": true,
+    "implementationPlan": true
+  },
+  "requirements": {
+    "total": 5,
+    "implemented": 5,
+    "items": [
+      {
+        "id": "REQ-11",
+        "summary": "Fix the app’s “stuck loading” behavior so the UI reliably progresses past initial load for both anonymous and authenticated users, with clear error states when initialization/auth/actor setup fails.",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/components/system/AppInitGate.tsx",
+          "frontend/src/components/system/RouteErrorBoundary.tsx",
+          "frontend/src/hooks/useActorStatus.ts",
+          "frontend/src/App.tsx"
+        ],
+        "matchedFiles": [
+          "frontend/src/components/system/AppInitGate.tsx",
+          "frontend/src/components/system/RouteErrorBoundary.tsx",
+          "frontend/src/hooks/useActorStatus.ts",
+          "frontend/src/App.tsx"
+        ]
+      },
+      {
+        "id": "REQ-12",
+        "summary": "Implement production-grade reliability and observability basics across frontend and backend, including explicit health checks, defensive error handling, and user-visible failure feedback for all backend calls.",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/lib/queryUtils.ts",
+          "frontend/src/components/system/HealthStatusBanner.tsx",
+          "frontend/src/components/system/AsyncState.tsx",
+          "frontend/src/lib/queries.ts",
+          "frontend/src/components/layout/AppLayout.tsx",
+          "frontend/src/features/datasets/DatasetsPage.tsx",
+          "frontend/src/features/prompts/PromptLibraryPage.tsx"
+        ],
+        "matchedFiles": [
+          "frontend/src/lib/queryUtils.ts",
+          "frontend/src/components/system/HealthStatusBanner.tsx",
+          "frontend/src/components/system/AsyncState.tsx",
+          "frontend/src/lib/queries.ts",
+          "frontend/src/components/layout/AppLayout.tsx",
+          "frontend/src/features/datasets/DatasetsPage.tsx",
+          "frontend/src/features/prompts/PromptLibraryPage.tsx"
+        ]
+      },
+      {
+        "id": "REQ-13",
+        "summary": "Add Binance account connectivity with API credential management, allowing a user to connect/disconnect their Binance account and verify connectivity before enabling trading.",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/components/trading/BinanceConnectionCard.tsx",
+          "frontend/src/lib/queries.ts",
+          "frontend/src/features/trading/TradingSafetyControlsPage.tsx"
+        ],
+        "matchedFiles": [
+          "frontend/src/components/trading/BinanceConnectionCard.tsx",
+          "frontend/src/lib/queries.ts",
+          "frontend/src/features/trading/TradingSafetyControlsPage.tsx"
+        ]
+      },
+      {
+        "id": "REQ-14",
+        "summary": "Implement trading modes with clear separation and safety gates: paper trading, shadow trading (live market data with simulated execution), and live trading (real order placement).",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/components/trading/TradingModeSwitcher.tsx",
+          "frontend/src/components/trading/LiveTradingConfirmDialog.tsx",
+          "frontend/src/components/trading/TradingModeBanner.tsx",
+          "frontend/src/lib/queries.ts",
+          "frontend/src/components/layout/AppLayout.tsx",
+          "frontend/src/features/trading/TradingHistoryPage.tsx"
+        ],
+        "matchedFiles": [
+          "frontend/src/components/trading/TradingModeSwitcher.tsx",
+          "frontend/src/components/trading/LiveTradingConfirmDialog.tsx",
+          "frontend/src/components/trading/TradingModeBanner.tsx",
+          "frontend/src/lib/queries.ts",
+          "frontend/src/components/layout/AppLayout.tsx",
+          "frontend/src/features/trading/TradingHistoryPage.tsx"
+        ]
+      },
+      {
+        "id": "REQ-15",
+        "summary": "Add core trading UI pages for production use: Portfolio/Positions, Orders, Trade History, and Safety Controls, integrated into the existing sidebar navigation and styled consistently with the current dashboard theme.",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/features/trading/TradingPortfolioPage.tsx",
+          "frontend/src/features/trading/TradingOrdersPage.tsx",
+          "frontend/src/features/trading/TradingSafetyControlsPage.tsx",
+          "frontend/src/App.tsx",
+          "frontend/src/components/layout/AppLayout.tsx",
+          "frontend/src/lib/queries.ts"
+        ],
+        "matchedFiles": [
+          "frontend/src/features/trading/TradingPortfolioPage.tsx",
+          "frontend/src/features/trading/TradingOrdersPage.tsx",
+          "frontend/src/features/trading/TradingSafetyControlsPage.tsx",
+          "frontend/src/App.tsx",
+          "frontend/src/components/layout/AppLayout.tsx",
+          "frontend/src/lib/queries.ts"
+        ]
+      }
+    ]
+  },
+  "changedFiles": [
+    "backend/http-outcalls/outcall.mo",
+    "backend/main.mo",
+    "backend/migration.mo",
+    "build-request.json",
+    "build-template/README.md",
+    "caffeine.lock.json",
+    "feature_evidence.json",
+    "frontend-file-summaries.txt",
+    "frontend-implementation-plan.json",
+    "frontend/src/App.tsx",
+    "frontend/src/backend.d.ts",
+    "frontend/src/backend.ts",
+    "frontend/src/components/auth/ProfileSetupModal.tsx",
+    "frontend/src/components/layout/AppLayout.tsx",
+    "frontend/src/components/system/AppInitGate.tsx",
+    "frontend/src/components/system/AsyncState.tsx",
+    "frontend/src/components/system/HealthStatusBanner.tsx",
+    "frontend/src/components/system/RouteErrorBoundary.tsx",
+    "frontend/src/components/trading/BinanceConnectionCard.tsx",
+    "frontend/src/components/trading/LiveTradingConfirmDialog.tsx",
+    "frontend/src/components/trading/TradingModeBanner.tsx",
+    "frontend/src/components/trading/TradingModeSwitcher.tsx",
+    "frontend/src/declarations/backend.did.d.ts",
+    "frontend/src/declarations/backend.did.js",
+    "frontend/src/features/datasets/DatasetsPage.tsx",
+    "frontend/src/features/prompts/PromptLibraryPage.tsx",
+    "frontend/src/features/trading/TradingHistoryPage.tsx",
+    "frontend/src/features/trading/TradingOrdersPage.tsx",
+    "frontend/src/features/trading/TradingPortfolioPage.tsx",
+    "frontend/src/features/trading/TradingSafetyControlsPage.tsx",
+    "frontend/src/hooks/useActorStatus.ts",
+    "frontend/src/lib/queries.ts",
+    "frontend/src/lib/queryUtils.ts",
+    "project_state.json",
+    "scratch/component-selection.json",
+    "spec.md",
+    "spec_vs_diff_report.json"
+  ]
+}

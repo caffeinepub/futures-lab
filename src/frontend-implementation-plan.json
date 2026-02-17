@@ -1,0 +1,203 @@
+{
+  "kind": "implementation_plan",
+  "version": "1.0",
+  "title": "Futures Lab — Frontend reliability hardening + trading UI (Binance connect, modes, pages)",
+  "requirements": [
+    {
+      "id": "REQ-11",
+      "summary": "Eliminate infinite initial loading by adding app initialization gating, clear recoverable error states, and a route-level error boundary.",
+      "acceptanceCriteria": [
+        "When loading the app in a fresh session, the user sees either (a) the AuthGate sign-in screen (unauthenticated) or (b) the main app layout (authenticated) within a reasonable time, without a perpetual spinner.",
+        "If access-control initialization fails (e.g., missing/invalid secret), the UI shows a non-blocking error message and offers a recovery action (e.g., retry / sign out) instead of hanging.",
+        "Backend authorization failures for normal users do not trap in a way that prevents the app from rendering; user profile fetch returns a safe result (e.g., null/unauthorized handled) and the frontend handles it gracefully.",
+        "Add a frontend-level error boundary for route rendering so runtime errors show a user-friendly fallback page rather than a blank/locked screen."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/components/system/AppInitGate.tsx",
+          "operation": "create",
+          "description": "Create an initialization gate that transitions between: initializing → ready → recoverable error (with Retry / Sign Out actions) to ensure the UI never remains on a perpetual spinner."
+        },
+        {
+          "path": "frontend/src/components/system/RouteErrorBoundary.tsx",
+          "operation": "create",
+          "description": "Create a user-friendly route rendering error boundary/fallback page (English copy + a 'Reload' and 'Go to Datasets' action) so runtime errors do not produce a blank/locked screen."
+        },
+        {
+          "path": "frontend/src/hooks/useActorStatus.ts",
+          "operation": "create",
+          "description": "Add a hook that inspects the React Query cache state for the actor query (from the existing immutable useActor hook) and exposes a safe status model (loading/ready/error + error details) usable by AppInitGate."
+        },
+        {
+          "path": "frontend/src/App.tsx",
+          "operation": "modify",
+          "description": "Wrap authenticated rendering with AppInitGate to prevent stuck initialization; wire RouteErrorBoundary into TanStack Router configuration (default error component/fallback) so route errors render a friendly UI rather than hanging/blank screens."
+        }
+      ]
+    },
+    {
+      "id": "REQ-12",
+      "summary": "Add frontend reliability/observability basics: health visibility, standardized query states, defensive error handling, and timeouts to prevent infinite spinners.",
+      "acceptanceCriteria": [
+        "Backend exposes a lightweight health endpoint/method that can be called from the frontend to confirm canister responsiveness.",
+        "All React Query calls display consistent loading, empty, and error states; errors are shown in English with actionable guidance (e.g., “Retry”, “Re-authenticate”).",
+        "Key user flows (login, profile load/save, dataset list/upload, prompt list/save) do not silently fail; failures are surfaced via UI toast/inline messaging.",
+        "Frontend avoids infinite spinners: any loading state has a timeout/fallback that transitions to an error UI if the operation does not resolve.",
+        "No changes are made to immutable frontend paths (hooks/useInternetIdentity*, hooks/useActor.ts, main.tsx, components/ui)."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/lib/queryUtils.ts",
+          "operation": "create",
+          "description": "Add shared helpers for frontend backend-call hardening (timeout wrapper, error normalization to English messages, and retry helpers) to standardize error handling across React Query without modifying immutable hooks."
+        },
+        {
+          "path": "frontend/src/components/system/HealthStatusBanner.tsx",
+          "operation": "create",
+          "description": "Create a compact banner/callout that displays system health (healthy/degraded/maintenance/unreachable/appIssue) with actionable guidance and a retry control."
+        },
+        {
+          "path": "frontend/src/components/system/AsyncState.tsx",
+          "operation": "create",
+          "description": "Create a reusable component to render consistent loading/empty/error states (with Retry button) for query-driven pages to avoid silent failures and inconsistent spinners."
+        },
+        {
+          "path": "frontend/src/lib/queries.ts",
+          "operation": "modify",
+          "description": "Harden React Query wrappers: add health queries (getSystemHealth/getHealthStatus), apply shared timeout + normalized error messaging, and ensure key mutations/queries surface user-visible errors with actionable toasts; ensure no infinite loading states by using timeouts and disabling uncontrolled retries where appropriate."
+        },
+        {
+          "path": "frontend/src/components/layout/AppLayout.tsx",
+          "operation": "modify",
+          "description": "Add HealthStatusBanner to the main layout (e.g., header area) so health/degraded/unreachable states are visible and do not block navigation."
+        },
+        {
+          "path": "frontend/src/features/datasets/DatasetsPage.tsx",
+          "operation": "modify",
+          "description": "Use AsyncState (or equivalent standardized pattern) to show consistent loading/empty/error states with Retry for dataset listing and upload flows; ensure upload failures show clear English feedback."
+        },
+        {
+          "path": "frontend/src/features/prompts/PromptLibraryPage.tsx",
+          "operation": "modify",
+          "description": "Use AsyncState (or equivalent standardized pattern) to show consistent loading/empty/error states with Retry for prompt list/create/seed flows; ensure failures are surfaced via toast/inline messaging."
+        }
+      ]
+    },
+    {
+      "id": "REQ-13",
+      "summary": "Add Binance connection UI for API credential entry, connect/disconnect, and connectivity verification with clear status and protection copy.",
+      "acceptanceCriteria": [
+        "Provide a new UI section for Binance connection that allows entering required Binance API credentials and displays connection status (connected / not connected / error).",
+        "Credentials are only accessible to the authenticated user who created them via access control; other principals cannot read/update them.",
+        "User can disconnect (remove) stored credentials, and the UI reflects the disconnected state immediately.",
+        "Connectivity verification is available (e.g., “Test Connection”) and returns a clear success/failure message in the UI.",
+        "User-facing copy clearly states whether credentials are stored and how they are protected within the app."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/components/trading/BinanceConnectionCard.tsx",
+          "operation": "create",
+          "description": "Create a Binance connection card UI (API key + secret inputs, Connect/Disconnect, Test Connection, and status indicator). Include explicit English copy describing that credentials are stored for the signed-in user and protected by access control."
+        },
+        {
+          "path": "frontend/src/lib/queries.ts",
+          "operation": "modify",
+          "description": "Add React Query mutations/queries for Binance connectivity (addBinanceAccount, disconnectBinance, verifyBinanceConnection) with consistent error handling and user-visible success/failure messaging."
+        },
+        {
+          "path": "frontend/src/features/trading/TradingSafetyControlsPage.tsx",
+          "operation": "create",
+          "description": "Integrate BinanceConnectionCard as a dedicated section within Safety Controls, showing connected/not connected/error state and providing connect/disconnect/test actions."
+        }
+      ]
+    },
+    {
+      "id": "REQ-14",
+      "summary": "Implement trading modes (paper/shadow/live) UI with clear mode indication, live trading confirmation gate, and activity log visibility placeholders backed by available backend calls.",
+      "acceptanceCriteria": [
+        "UI lets the user choose a trading mode (paper / shadow / live) and clearly indicates the active mode across the trading screens.",
+        "Paper mode executes trades against an internal simulated portfolio and persists simulated orders/trades/positions per user in the backend.",
+        "Shadow mode fetches live Binance market data but executes against the same simulated portfolio logic (no real orders are sent).",
+        "Live mode is disabled by default and requires an explicit user confirmation gate (e.g., typing a confirmation phrase) before enabling order placement.",
+        "Mode-specific safety controls are enforced server-side (at minimum: kill switch toggle, max notional/size limit, and a per-user “live trading enabled” flag).",
+        "All modes produce an auditable activity log (orders submitted, fills/sim-fills, cancellations, safety blocks) visible in the UI."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/components/trading/TradingModeSwitcher.tsx",
+          "operation": "create",
+          "description": "Create a mode switcher UI (paper/shadow/live) that clearly indicates the active mode and triggers mode updates via backend calls; use shadcn/tailwind styling for consistent dashboard appearance."
+        },
+        {
+          "path": "frontend/src/components/trading/LiveTradingConfirmDialog.tsx",
+          "operation": "create",
+          "description": "Create a confirmation dialog requiring a typed phrase before enabling live trading mode; show strong English warnings and require explicit user intent before proceeding."
+        },
+        {
+          "path": "frontend/src/components/trading/TradingModeBanner.tsx",
+          "operation": "create",
+          "description": "Create a persistent visual indicator (banner/pill) showing the active trading mode across trading pages, including contextual warnings for shadow/live."
+        },
+        {
+          "path": "frontend/src/lib/queries.ts",
+          "operation": "modify",
+          "description": "Add/update React Query wrappers for trading mode state (getCallerUserProfile-derived trading status, updateTradingMode) and activity/trade retrieval using available backend functions, with standardized error handling and timeouts."
+        },
+        {
+          "path": "frontend/src/components/layout/AppLayout.tsx",
+          "operation": "modify",
+          "description": "Wire TradingModeSwitcher + TradingModeBanner into the layout (e.g., header area) so the active mode is always visible on trading screens and can be changed safely via the live confirmation gate."
+        },
+        {
+          "path": "frontend/src/features/trading/TradingHistoryPage.tsx",
+          "operation": "create",
+          "description": "Implement an Activity/Trade History view that lists mode-specific historical activity using available backend trade retrieval; include filtering UI (symbol + time range) and clear empty/error states."
+        }
+      ]
+    },
+    {
+      "id": "REQ-15",
+      "summary": "Add Trading UI pages (Portfolio/Positions, Orders, Trade History, Safety Controls) and integrate them into the existing sidebar navigation with consistent shadcn/tailwind styling.",
+      "acceptanceCriteria": [
+        "Sidebar navigation includes a dedicated Trading section with links to the new pages (without breaking existing routes).",
+        "Portfolio/Positions page shows current balances/positions for the active mode (simulated for paper/shadow; live account positions for live when enabled).",
+        "Orders page supports placing a basic order (at minimum: symbol, side, quantity, order type) and shows open orders with cancel actions appropriate to the active mode.",
+        "Trade History page lists historical trades/fills for the active mode with filtering by symbol and time range.",
+        "Safety Controls page provides kill switch and key risk limits with immediate UI feedback when toggled/changed.",
+        "All new UI components use existing shadcn/tailwind patterns and have responsive layouts (desktop + mobile)."
+      ],
+      "file_operations": [
+        {
+          "path": "frontend/src/features/trading/TradingPortfolioPage.tsx",
+          "operation": "create",
+          "description": "Create Portfolio/Positions page UI showing positions/balances for the active mode with responsive layout and standardized loading/empty/error states."
+        },
+        {
+          "path": "frontend/src/features/trading/TradingOrdersPage.tsx",
+          "operation": "create",
+          "description": "Create Orders page UI supporting basic order placement (symbol/side/quantity/order type) and an open orders list with cancel actions appropriate to the active mode; include safety messaging for live mode."
+        },
+        {
+          "path": "frontend/src/features/trading/TradingSafetyControlsPage.tsx",
+          "operation": "create",
+          "description": "Create Safety Controls page UI for kill switch and risk limits with immediate feedback; include the Binance connection section and mode-aware safety copy (English)."
+        },
+        {
+          "path": "frontend/src/App.tsx",
+          "operation": "modify",
+          "description": "Register new Trading routes (Portfolio/Positions, Orders, Trade History, Safety Controls) in TanStack Router and ensure they render within the existing AppLayout (no orphan pages)."
+        },
+        {
+          "path": "frontend/src/components/layout/AppLayout.tsx",
+          "operation": "modify",
+          "description": "Update sidebar navigation to include a dedicated 'Trading' section with links to the new pages, preserving existing routes and styling."
+        },
+        {
+          "path": "frontend/src/lib/queries.ts",
+          "operation": "modify",
+          "description": "Add/extend query helpers needed by the new Trading pages (mode status, orders/trades placeholders backed by available backend functions) and ensure consistent user-visible error states across all new trading calls."
+        }
+      ]
+    }
+  ]
+}

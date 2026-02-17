@@ -1,0 +1,225 @@
+{
+  "schemaVersion": "1.0.0",
+  "projectStateVersion": 5,
+  "summary": "Extend Futures Lab from a research/backtest dashboard into a production-grade trading system that can connect to Binance for paper/shadow trading and live trading, with improved UI/UX and reliability.",
+  "architectural_notes": [
+    "Separate offline training (Python/PyTorch) from low-latency execution service; execution receives intents and enforces risk rules server-side.",
+    "Use Gym-style simulator/backtester that replays historical market/orderbook data and models slippage, latency, fees, and partial fills.",
+    "Hybrid approach: forecasting model outputs (LSTM/GRU) become features for the RL execution policy (PPO/SAC).",
+    "Risk-aware reward design: equity delta with drawdown/volatility/transaction-cost penalties and large liquidation penalty.",
+    "Non-negotiable safety layer: kill-switch, daily loss cap, per-trade risk cap, leverage clamp, min-notional checks, order rate limits, and reconciliation checks.",
+    "Deployment requires model versioning + canary rollout + rollback, plus monitoring for PnL, drawdown, drift, latency, and token usage if LLMs are used.",
+    "Add an exchange integration layer (Binance connector) with secure API credential storage, permissions scoping, and environment separation (testnet/paper vs live).",
+    "Support explicit execution modes (paper/shadow/live) with distinct routing, safety gates, and audit logging to prevent accidental live orders."
+  ],
+  "known_issues": [
+    "App is stuck loading / does not progress past initial load (reported by user)."
+  ],
+  "isFixRequest": true,
+  "existing_features": [
+    {
+      "id": "feature-create-a-react-frontend-that-provides-an-end-to-end-workflow-ui-upload-a-candle-dataset-file-configure-a-backtest-risk-config-reward-config-simulator-params-run-the-backtest-and-view-results-including-equity-curve-drawdown-trade-list-and-safety-events",
+      "title": "Create a React frontend that provides an end-to-end workflow UI: upload a candle dataset file, configure a backtest (risk config + reward config + simulator params), run the backtest, and view results including equity curve, drawdown, trade list, and safety events.",
+      "reqIds": [
+        "REQ-6"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-implement-an-episode-review-frontend-section-that-lets-users-inspect-flagged-negative-episodes-trades-add-a-human-note-and-export-a-json-payload-that-matches-the-provided-llm-analyzer-prompt-input-shape-episode-id-episode-context-fields",
+      "title": "Implement an “Episode Review” frontend section that lets users inspect flagged negative episodes/trades, add a human note, and export a JSON payload that matches the provided LLM analyzer prompt input shape (episode_id + episode_context fields).",
+      "reqIds": [
+        "REQ-7"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-provide-a-prompt-library-frontend-section-backed-by-stored-prompttemplates-pre-populated-with-the-three-prompt-templates-described-episode-analyzer-reward-tuning-advisor-orchestration-assistant-editable-by-the-user-and-copyable-to-clipboard",
+      "title": "Provide a “Prompt Library” frontend section backed by stored PromptTemplates, pre-populated with the three prompt templates described (Episode Analyzer, Reward Tuning Advisor, Orchestration Assistant), editable by the user, and copyable to clipboard.",
+      "reqIds": [
+        "REQ-8"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-a-consistent-distinctive-visual-theme-for-the-frontend-colors-typography-spacing-and-layout-system-suitable-for-a-serious-trading-research-dashboard-and-apply-it-across-all-screens-and-components",
+      "title": "Add a consistent, distinctive visual theme for the frontend (colors, typography, spacing, and layout system) suitable for a serious trading research dashboard, and apply it across all screens and components.",
+      "reqIds": [
+        "REQ-9"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-a-lightweight-monitoring-metrics-view-in-the-frontend-that-summarizes-key-run-metrics-pnl-realized-unrealized-if-applicable-in-sim-max-drawdown-over-run-trade-count-and-simple-drift-proxy-such-as-feature-distribution-summary-over-the-dataset",
+      "title": "Add a lightweight monitoring/metrics view in the frontend that summarizes key run metrics (PnL, realized/unrealized if applicable in sim, max drawdown over run, trade count, and simple drift proxy such as feature distribution summary over the dataset).",
+      "reqIds": [
+        "REQ-10"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-fix-the-app-s-stuck-loading-behavior-so-the-ui-reliably-progresses-past-initial-load-for-both-anonymous-and-authenticated-users-with-clear-error-states-when-initialization-auth-actor-setup-fails",
+      "title": "Fix the app’s “stuck loading” behavior so the UI reliably progresses past initial load for both anonymous and authenticated users, with clear error states when initialization/auth/actor setup fails.",
+      "reqIds": [
+        "REQ-11"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-implement-production-grade-reliability-and-observability-basics-across-frontend-and-backend-including-explicit-health-checks-defensive-error-handling-and-user-visible-failure-feedback-for-all-backend-calls",
+      "title": "Implement production-grade reliability and observability basics across frontend and backend, including explicit health checks, defensive error handling, and user-visible failure feedback for all backend calls.",
+      "reqIds": [
+        "REQ-12"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-binance-account-connectivity-with-api-credential-management-allowing-a-user-to-connect-disconnect-their-binance-account-and-verify-connectivity-before-enabling-trading",
+      "title": "Add Binance account connectivity with API credential management, allowing a user to connect/disconnect their Binance account and verify connectivity before enabling trading.",
+      "reqIds": [
+        "REQ-13"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-implement-trading-modes-with-clear-separation-and-safety-gates-paper-trading-shadow-trading-live-market-data-with-simulated-execution-and-live-trading-real-order-placement",
+      "title": "Implement trading modes with clear separation and safety gates: paper trading, shadow trading (live market data with simulated execution), and live trading (real order placement).",
+      "reqIds": [
+        "REQ-14"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-core-trading-ui-pages-for-production-use-portfolio-positions-orders-trade-history-and-safety-controls-integrated-into-the-existing-sidebar-navigation-and-styled-consistently-with-the-current-dashboard-theme",
+      "title": "Add core trading UI pages for production use: Portfolio/Positions, Orders, Trade History, and Safety Controls, integrated into the existing sidebar navigation and styled consistently with the current dashboard theme.",
+      "reqIds": [
+        "REQ-15"
+      ],
+      "version": 1
+    }
+  ],
+  "new_feature_requests": [
+    {
+      "id": "AR-1",
+      "summary": "Define end-to-end system architecture separating training (Python/PyTorch) and low-latency execution service (Node/Python/Rust)",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-2",
+      "summary": "Implement data ingestion + storage and feature pipeline (candles, trades, orderbook, funding/OI, news sentiment, on-chain optional)",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-3",
+      "summary": "Build realistic simulator/backtester as Gym environment (slippage, latency, partial fills, fees) supporting paper/live modes",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-4",
+      "summary": "Create supervised forecasting model (LSTM/GRU) producing return/volatility forecasts + uncertainty for downstream features",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-5",
+      "summary": "Train RL policy (PPO/SAC) with defined observation/action spaces and risk-aware reward function",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-6",
+      "summary": "Add continual/online learning pipeline (experience replay, prioritized negative episodes, shadow eval, nightly fine-tuning)",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-7",
+      "summary": "Implement server-side safety/risk manager (kill switch, daily loss limit, max trade risk %, leverage cap, rate limits, reconciliation)",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-8",
+      "summary": "Deployment + monitoring stack (model versioning/hot-swap/canary, Prometheus/Grafana, drift metrics, alerts)",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-9",
+      "summary": "LLM-assisted prompts/scripts for episode diagnosis, reward tuning, and retrain/hold/revert orchestration decisions",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-10",
+      "summary": "Implement Motoko backend data models and CRUD APIs to support a futures-trading research workflow: (a) market datasets uploaded by the user (time series candles at minimum), (b) backtest run configurations, (c) backtest run results (equity curve + summary metrics), (d) episode/trade logs (including loss-tagging), (e) safety/risk configuration, and (f) saved prompt templates for LLM-assisted analysis/tuning (stored as plain text).",
+      "reqIds": [
+        "REQ-1"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-11",
+      "summary": "Implement a deterministic backtest/simulation engine in the Motoko backend that replays an uploaded candle dataset and simulates position management with fees and configurable slippage, generating step-by-step equity updates and trade/episode logs.",
+      "reqIds": [
+        "REQ-2"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-12",
+      "summary": "Add server-side safety and hard overrides in the backend simulation/execution layer, including: daily loss limit %, max trade risk % (position sizing clamp/reject), max leverage cap, min notional, rate-limit guard (max actions/orders per window), and a global kill-switch that cancels any open simulated orders and pauses further actions for that run.",
+      "reqIds": [
+        "REQ-3"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-13",
+      "summary": "Implement a configurable reward function calculator in the backend that can compute per-step rewards and run-level aggregates using the user-defined coefficients: drawdown penalty, volatility/leverage penalty, transaction cost penalty, and liquidation penalty (simulated). Persist the RewardConfig used for each run.",
+      "reqIds": [
+        "REQ-4"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-14",
+      "summary": "Add a backend feature for “failure logging” and prioritized negative-episode tagging: automatically flag and store episodes/trades that exceed a configurable loss threshold, and provide an API to list negative episodes for review.",
+      "reqIds": [
+        "REQ-5"
+      ],
+      "status": "pending"
+    },
+    {
+      "id": "AR-15",
+      "summary": "Integrate Binance account connectivity (API key management + exchange connector) to support account data, order placement, and position management",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-16",
+      "summary": "Add trading modes: paper trading, shadow trading (live market data with simulated execution), and live trading with clear mode separation and safety gates",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-17",
+      "summary": "Production hardening: fix loading/hangs, improve reliability/observability, and ensure production-grade readiness (health checks, error handling, performance)",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-18",
+      "summary": "Upgrade UI/UX for a polished, beautiful, production-quality trading dashboard experience across screens",
+      "reqIds": [],
+      "status": "pending"
+    }
+  ],
+  "gameProjectType": "none",
+  "projectName": "Futures Lab",
+  "clarification_mode": "instant",
+  "clarification_rounds": 0
+}

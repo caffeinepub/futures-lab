@@ -1,0 +1,124 @@
+{
+  "kind": "build_request",
+  "title": "Fix infinite loading and add Binance trading (paper/shadow/live) with production hardening",
+  "projectName": "Futures Lab",
+  "priority": "high",
+  "requirements": [
+    {
+      "id": "REQ-11",
+      "text": "Fix the app’s “stuck loading” behavior so the UI reliably progresses past initial load for both anonymous and authenticated users, with clear error states when initialization/auth/actor setup fails.",
+      "target": "both",
+      "source": {
+        "messageIds": [
+          "msg-4"
+        ],
+        "quotes": [
+          "It's just loading."
+        ]
+      },
+      "acceptanceCriteria": [
+        "When loading the app in a fresh session, the user sees either (a) the AuthGate sign-in screen (unauthenticated) or (b) the main app layout (authenticated) within a reasonable time, without a perpetual spinner.",
+        "If access-control initialization fails (e.g., missing/invalid secret), the UI shows a non-blocking error message and offers a recovery action (e.g., retry / sign out) instead of hanging.",
+        "Backend authorization failures for normal users do not trap in a way that prevents the app from rendering; user profile fetch returns a safe result (e.g., null/unauthorized handled) and the frontend handles it gracefully.",
+        "Add a frontend-level error boundary for route rendering so runtime errors show a user-friendly fallback page rather than a blank/locked screen."
+      ]
+    },
+    {
+      "id": "REQ-12",
+      "text": "Implement production-grade reliability and observability basics across frontend and backend, including explicit health checks, defensive error handling, and user-visible failure feedback for all backend calls.",
+      "target": "both",
+      "source": {
+        "messageIds": [
+          "msg-4"
+        ],
+        "quotes": [
+          "Also make sure that the app is completely production grade and ready."
+        ]
+      },
+      "acceptanceCriteria": [
+        "Backend exposes a lightweight health endpoint/method that can be called from the frontend to confirm canister responsiveness.",
+        "All React Query calls display consistent loading, empty, and error states; errors are shown in English with actionable guidance (e.g., “Retry”, “Re-authenticate”).",
+        "Key user flows (login, profile load/save, dataset list/upload, prompt list/save) do not silently fail; failures are surfaced via UI toast/inline messaging.",
+        "Frontend avoids infinite spinners: any loading state has a timeout/fallback that transitions to an error UI if the operation does not resolve.",
+        "No changes are made to immutable frontend paths (hooks/useInternetIdentity*, hooks/useActor.ts, main.tsx, components/ui)."
+      ]
+    },
+    {
+      "id": "REQ-13",
+      "text": "Add Binance account connectivity with API credential management, allowing a user to connect/disconnect their Binance account and verify connectivity before enabling trading.",
+      "target": "both",
+      "source": {
+        "messageIds": [
+          "msg-4"
+        ],
+        "quotes": [
+          "Finally we can connect my binance account api."
+        ]
+      },
+      "acceptanceCriteria": [
+        "Provide a new UI section for Binance connection that allows entering required Binance API credentials and displays connection status (connected / not connected / error).",
+        "Credentials are only accessible to the authenticated user who created them via access control; other principals cannot read/update them.",
+        "User can disconnect (remove) stored credentials, and the UI reflects the disconnected state immediately.",
+        "Connectivity verification is available (e.g., “Test Connection”) and returns a clear success/failure message in the UI.",
+        "User-facing copy clearly states whether credentials are stored and how they are protected within the app."
+      ]
+    },
+    {
+      "id": "REQ-14",
+      "text": "Implement trading modes with clear separation and safety gates: paper trading, shadow trading (live market data with simulated execution), and live trading (real order placement).",
+      "target": "both",
+      "source": {
+        "messageIds": [
+          "msg-4"
+        ],
+        "quotes": [
+          "I want paper/shadow trading to work and also live trading."
+        ]
+      },
+      "acceptanceCriteria": [
+        "UI lets the user choose a trading mode (paper / shadow / live) and clearly indicates the active mode across the trading screens.",
+        "Paper mode executes trades against an internal simulated portfolio and persists simulated orders/trades/positions per user in the backend.",
+        "Shadow mode fetches live Binance market data but executes against the same simulated portfolio logic (no real orders are sent).",
+        "Live mode is disabled by default and requires an explicit user confirmation gate (e.g., typing a confirmation phrase) before enabling order placement.",
+        "Mode-specific safety controls are enforced server-side (at minimum: kill switch toggle, max notional/size limit, and a per-user “live trading enabled” flag).",
+        "All modes produce an auditable activity log (orders submitted, fills/sim-fills, cancellations, safety blocks) visible in the UI."
+      ]
+    },
+    {
+      "id": "REQ-15",
+      "text": "Add core trading UI pages for production use: Portfolio/Positions, Orders, Trade History, and Safety Controls, integrated into the existing sidebar navigation and styled consistently with the current dashboard theme.",
+      "target": "frontend",
+      "source": {
+        "messageIds": [
+          "msg-4"
+        ],
+        "quotes": [
+          "Make beautiful ui ux"
+        ]
+      },
+      "acceptanceCriteria": [
+        "Sidebar navigation includes a dedicated Trading section with links to the new pages (without breaking existing routes).",
+        "Portfolio/Positions page shows current balances/positions for the active mode (simulated for paper/shadow; live account positions for live when enabled).",
+        "Orders page supports placing a basic order (at minimum: symbol, side, quantity, order type) and shows open orders with cancel actions appropriate to the active mode.",
+        "Trade History page lists historical trades/fills for the active mode with filtering by symbol and time range.",
+        "Safety Controls page provides kill switch and key risk limits with immediate UI feedback when toggled/changed.",
+        "All new UI components use existing shadcn/tailwind patterns and have responsive layouts (desktop + mobile)."
+      ]
+    }
+  ],
+  "constraints": [
+    "Backend must remain a single Motoko actor in backend/main.mo; only add migration.mo if an upgrade requires state migration.",
+    "Do not edit frontend immutable paths: frontend/src/hooks/useInternetIdentity.ts, frontend/src/hooks/useInternetIdentity.tsx, frontend/src/hooks/useActor.ts, frontend/src/main.tsx, frontend/src/components/ui/* (compose instead).",
+    "Use English for all user-facing text."
+  ],
+  "nonGoals": [
+    "Implementing external non-IC services (Python/Node/Rust execution microservices) or any non-Motoko backend.",
+    "Implementing third-party authentication other than Internet Identity.",
+    "Implementing full RL training, model hosting, or external monitoring stacks (e.g., Prometheus/Grafana) beyond basic in-app health/error visibility.",
+    "Implementing high-frequency/low-latency trading guarantees or colocated execution."
+  ],
+  "imageRequirements": {
+    "required": [],
+    "edits": []
+  }
+}

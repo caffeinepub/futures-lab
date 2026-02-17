@@ -1,0 +1,149 @@
+{
+  "kind": "spec_vs_diff_report",
+  "version": "1.0",
+  "generatedAt": "2026-02-17T17:06:16.494Z",
+  "summary": "Diff implements several reliability UI components (AppInitGate, AsyncState, RouteErrorBoundary), adds backend health methods, introduces Binance credential storage endpoints, and adds Trading routes/pages + sidebar navigation. However, multiple core trading-mode backend behaviors (simulated portfolio persistence, server-side safety enforcement, activity/audit logs, and real trade/order data) are not evidenced in the diff; some authorization/error-handling acceptance criteria are also not met due to backend traps. There is also user-facing text claiming credential encryption without evidence of encryption in storage.",
+  "missing_requirements": [
+    {
+      "id": "REQ-11",
+      "requirement": "Backend authorization failures for normal users do not trap in a way that prevents the app from rendering; user profile fetch returns a safe result (e.g., null/unauthorized handled) and the frontend handles it gracefully.",
+      "reason": "backend/main.mo still traps on unauthorized access in getCallerUserProfile/saveCallerUserProfile rather than returning a safe result; this can still propagate as hard failures rather than graceful unauthorized/null handling.",
+      "evidence": [
+        "backend/main.mo (getCallerUserProfile/saveCallerUserProfile use Runtime.trap(\"Unauthorized...\") per diff excerpt)"
+      ]
+    },
+    {
+      "id": "REQ-12",
+      "requirement": "Frontend avoids infinite spinners: any loading state has a timeout/fallback that transitions to an error UI if the operation does not resolve.",
+      "reason": "withTimeout() is added and used for many queryFns, but the new AppInitGate loading UI has no explicit timeout-to-error behavior shown; it depends solely on actor isFetching/availability and may still remain in 'loading' if upstream never resolves.",
+      "evidence": [
+        "frontend/src/components/system/AppInitGate.tsx (shows spinner when status==='loading' with no timeout/fallback)",
+        "frontend/src/hooks/useActorStatus.ts (status derived from useActor().isFetching/actor presence only)"
+      ]
+    },
+    {
+      "id": "REQ-14",
+      "requirement": "Paper mode executes trades against an internal simulated portfolio and persists simulated orders/trades/positions per user in the backend.",
+      "reason": "Trading pages use mock portfolio/orders/trades data and no backend methods/types for simulated portfolio persistence are evidenced in the provided backend diff excerpt.",
+      "evidence": [
+        "frontend/src/features/trading/TradingPortfolioPage.tsx (\"Mock portfolio data\")",
+        "frontend/src/features/trading/TradingOrdersPage.tsx (\"Mock open orders\")",
+        "frontend/src/features/trading/TradingHistoryPage.tsx (\"Mock trade history\")",
+        "backend/main.mo (no shown portfolio/order/trade persistence APIs beyond old 'trades' map mention in migration types)"
+      ]
+    },
+    {
+      "id": "REQ-14",
+      "requirement": "Shadow mode fetches live Binance market data but executes against the same simulated portfolio logic (no real orders are sent).",
+      "reason": "No market data fetching implementation is evidenced; UI behavior is only messaging/toasts and the portfolio/orders/history are mocked.",
+      "evidence": [
+        "frontend/src/features/trading/TradingOrdersPage.tsx (toast/message only; no data fetching)",
+        "frontend/src/features/trading/TradingPortfolioPage.tsx (mock data)",
+        "backend/main.mo (no shown market data methods)"
+      ]
+    },
+    {
+      "id": "REQ-14",
+      "requirement": "Mode-specific safety controls are enforced server-side (at minimum: kill switch toggle, max notional/size limit, and a per-user “live trading enabled” flag).",
+      "reason": "Safety controls page keeps kill switch and limits in local React state and only shows a toast on save; no backend storage/enforcement methods for kill switch/limits are evidenced. Backend tradingStatus has tradingEnabled Bool but no evidence of server-side gating/enforcement for orders/trades.",
+      "evidence": [
+        "frontend/src/features/trading/TradingSafetyControlsPage.tsx (killSwitch/maxNotional/maxPositionSize stored in component state; handleSaveControls only toast)",
+        "backend/main.mo (types include TradingStatus.tradingEnabled, but no shown enforcement on any order placement APIs)"
+      ]
+    },
+    {
+      "id": "REQ-14",
+      "requirement": "All modes produce an auditable activity log (orders submitted, fills/sim-fills, cancellations, safety blocks) visible in the UI.",
+      "reason": "No activity log UI or backend logging APIs are evidenced; existing trading pages display mocked orders/trades without audit/safety-block events.",
+      "evidence": [
+        "frontend/src/features/trading/TradingOrdersPage.tsx (mock orders, toast-only actions)",
+        "frontend/src/features/trading/TradingHistoryPage.tsx (mock trades)",
+        "backend/main.mo (no shown activity log types/methods)"
+      ]
+    },
+    {
+      "id": "REQ-15",
+      "requirement": "Portfolio/Positions page shows current balances/positions for the active mode (simulated for paper/shadow; live account positions for live when enabled).",
+      "reason": "Portfolio page explicitly uses mock data and does not fetch mode-specific balances/positions from backend or Binance.",
+      "evidence": [
+        "frontend/src/features/trading/TradingPortfolioPage.tsx (\"Mock portfolio data - in production this would come from backend\")"
+      ]
+    },
+    {
+      "id": "REQ-15",
+      "requirement": "Orders page supports placing a basic order ... and shows open orders with cancel actions appropriate to the active mode.",
+      "reason": "Orders are not placed/cancelled via backend; behavior is toast-only and open orders are mock data, so mode-appropriate backend execution/cancellation is not implemented in evidence.",
+      "evidence": [
+        "frontend/src/features/trading/TradingOrdersPage.tsx (handlePlaceOrder only toasts; mockOrders; handleCancelOrder only toast)"
+      ]
+    },
+    {
+      "id": "REQ-15",
+      "requirement": "Trade History page lists historical trades/fills for the active mode with filtering by symbol and time range.",
+      "reason": "Trade history uses mock trades; time-range filtering appears to be UI-only selection (no evidence of applying timeRange to data retrieval).",
+      "evidence": [
+        "frontend/src/features/trading/TradingHistoryPage.tsx (\"Mock trade history\"; filteredTrades only checks symbolFilter in shown excerpt)"
+      ]
+    },
+    {
+      "id": "REQ-13",
+      "requirement": "Connectivity verification is available (e.g., “Test Connection”) and returns a clear success/failure message in the UI.",
+      "reason": "UI provides Test Connection and toasts, but backend-side verification behavior is truncated/unclear; no evidence it performs real connectivity checks (and non-goals prohibit external services). If intended as “canister-side credential presence/format check”, that is not clearly evidenced either due to truncation.",
+      "evidence": [
+        "frontend/src/components/trading/BinanceConnectionCard.tsx (handleTestConnection uses useVerifyBinanceConnection)",
+        "backend/main.mo (verifyBinanceConnection implementation truncated)"
+      ]
+    }
+  ],
+  "hallucinated_features": [
+    {
+      "description": "UI copy claims Binance API credentials are encrypted and stored securely, but backend diff shows credentials stored directly as Text fields in a canister Map with no evidenced encryption.",
+      "reason": "This is a security/protection claim not supported by the shown implementation; could mislead users about how credentials are protected.",
+      "evidence": [
+        "frontend/src/components/trading/BinanceConnectionCard.tsx (\"Your API credentials are encrypted and stored securely\")",
+        "backend/main.mo (BinanceAccount { apiKey : Text; secretKey : Text; } stored in Map)"
+      ]
+    },
+    {
+      "description": "Admin-only setSystemHealth method (manual health state setting) beyond the requested lightweight health check method.",
+      "reason": "REQ-12 asks for a health endpoint/method for responsiveness; adding a privileged setter is extra functionality not explicitly requested.",
+      "evidence": [
+        "backend/main.mo (public shared func setSystemHealth(state : HealthStatus) with admin check)"
+      ]
+    },
+    {
+      "description": "Large new/modified placeholder pages for backtests/metrics/episodes described as 'planned' or 'not yet implemented'.",
+      "reason": "Not part of REQ-11..REQ-15; these additions/changes appear unrelated to the requested trading/initialization/observability work.",
+      "evidence": [
+        "frontend-file-summaries.txt (BacktestConfigPage/RunBacktestPage/BacktestResultsPage/EpisodeReviewPage/MetricsPage described as placeholders not yet implemented)"
+      ]
+    }
+  ],
+  "confidence": 0.74,
+  "changed_files": [
+    "backend/main.mo",
+    "backend/migration.mo",
+    "frontend-file-summaries.txt",
+    "frontend/src/App.tsx",
+    "frontend/src/components/auth/ProfileSetupModal.tsx",
+    "frontend/src/components/layout/AppLayout.tsx",
+    "frontend/src/components/system/AppInitGate.tsx",
+    "frontend/src/components/system/AsyncState.tsx",
+    "frontend/src/components/system/HealthStatusBanner.tsx",
+    "frontend/src/components/system/RouteErrorBoundary.tsx",
+    "frontend/src/components/trading/BinanceConnectionCard.tsx",
+    "frontend/src/components/trading/LiveTradingConfirmDialog.tsx",
+    "frontend/src/components/trading/TradingModeBanner.tsx",
+    "frontend/src/components/trading/TradingModeSwitcher.tsx",
+    "frontend/src/features/datasets/DatasetsPage.tsx",
+    "frontend/src/features/prompts/PromptLibraryPage.tsx",
+    "frontend/src/features/trading/TradingHistoryPage.tsx",
+    "frontend/src/features/trading/TradingOrdersPage.tsx",
+    "frontend/src/features/trading/TradingPortfolioPage.tsx",
+    "frontend/src/features/trading/TradingSafetyControlsPage.tsx",
+    "frontend/src/hooks/useActorStatus.ts",
+    "frontend/src/lib/queries.ts",
+    "frontend/src/lib/queryUtils.ts",
+    "project_state.json"
+  ]
+}
