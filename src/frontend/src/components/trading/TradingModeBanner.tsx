@@ -1,11 +1,15 @@
 import { useGetCallerUserProfile } from '../../lib/queries';
+import { normalizeTradingMode } from '../../lib/canisterValueNormalizers';
 import { TradingMode } from '../../backend';
 import { Alert, AlertDescription } from '@/components/ui/alert';
 import { AlertTriangle, TestTube, Eye } from 'lucide-react';
 
 export function TradingModeBanner() {
   const { data: profile } = useGetCallerUserProfile();
-  const mode = profile?.tradingStatus?.mode || TradingMode.paperTrading;
+  
+  // Normalize the mode to handle different runtime representations
+  const rawMode = profile?.tradingStatus?.mode;
+  const mode = rawMode ? normalizeTradingMode(rawMode) : TradingMode.paperTrading;
 
   const getModeConfig = () => {
     switch (mode) {

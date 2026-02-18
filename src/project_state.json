@@ -1,6 +1,6 @@
 {
   "schemaVersion": "1.0.0",
-  "projectStateVersion": 5,
+  "projectStateVersion": 7,
   "summary": "Extend Futures Lab from a research/backtest dashboard into a production-grade trading system that can connect to Binance for paper/shadow trading and live trading, with improved UI/UX and reliability.",
   "architectural_notes": [
     "Separate offline training (Python/PyTorch) from low-latency execution service; execution receives intents and enforces risk rules server-side.",
@@ -10,10 +10,12 @@
     "Non-negotiable safety layer: kill-switch, daily loss cap, per-trade risk cap, leverage clamp, min-notional checks, order rate limits, and reconciliation checks.",
     "Deployment requires model versioning + canary rollout + rollback, plus monitoring for PnL, drawdown, drift, latency, and token usage if LLMs are used.",
     "Add an exchange integration layer (Binance connector) with secure API credential storage, permissions scoping, and environment separation (testnet/paper vs live).",
-    "Support explicit execution modes (paper/shadow/live) with distinct routing, safety gates, and audit logging to prevent accidental live orders."
+    "Support explicit execution modes (paper/shadow/live) with distinct routing, safety gates, and audit logging to prevent accidental live orders.",
+    "Platform constraint: prioritize production-ready paper/shadow trading and Binance testnet integration; live real-funds order routing may be restricted and must remain behind explicit safety gates/permissions."
   ],
   "known_issues": [
-    "App is stuck loading / does not progress past initial load (reported by user)."
+    "App is stuck loading / does not progress past initial load (reported by user).",
+    "Draft app/version expired; requires rebuild/redeploy to restore a working app instance."
   ],
   "isFixRequest": true,
   "existing_features": [
@@ -94,6 +96,38 @@
       "title": "Add core trading UI pages for production use: Portfolio/Positions, Orders, Trade History, and Safety Controls, integrated into the existing sidebar navigation and styled consistently with the current dashboard theme.",
       "reqIds": [
         "REQ-15"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-fix-the-app-s-stuck-loading-blank-screen-startup-flow-so-the-ui-always-reaches-a-stable-state-authgate-for-signed-out-users-or-the-main-router-for-signed-in-users-with-clear-actionable-error-ui-if-initialization-fails",
+      "title": "Fix the app’s stuck-loading / blank-screen startup flow so the UI always reaches a stable state (AuthGate for signed-out users, or the main router for signed-in users) with clear, actionable error UI if initialization fails.",
+      "reqIds": [
+        "REQ-16"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-resolve-backend-frontend-type-mismatches-that-can-crash-or-break-rendering-especially-for-motoko-variant-types-such-as-healthstatus-and-tradingmode-by-ensuring-frontend-components-correctly-interpret-the-generated-canister-bindings-at-runtime",
+      "title": "Resolve backend/Frontend type mismatches that can crash or break rendering (especially for Motoko variant types such as HealthStatus and TradingMode) by ensuring frontend components correctly interpret the generated canister bindings at runtime.",
+      "reqIds": [
+        "REQ-17"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-make-actor-initialization-resilient-for-non-admin-users-so-normal-logins-do-not-fail-due-to-missing-admin-secrets-only-perform-admin-only-initialization-when-an-admin-token-is-present-and-ensure-regular-authenticated-users-can-successfully-pass-authorization-checks-for-standard-user-flows-profile-datasets-prompts",
+      "title": "Make actor initialization resilient for non-admin users so normal logins do not fail due to missing admin secrets; only perform admin-only initialization when an admin token is present, and ensure regular authenticated users can successfully pass authorization checks for standard user flows (profile, datasets, prompts).",
+      "reqIds": [
+        "REQ-18"
+      ],
+      "version": 1
+    },
+    {
+      "id": "feature-add-an-end-to-end-startup-smoke-test-checklist-implemented-as-minimal-user-visible-diagnostics-in-the-ui-not-automated-test-infrastructure-provide-a-single-debug-panel-or-route-section-that-shows-actor-readiness-auth-state-and-results-of-a-basic-health-profile-probe-so-users-can-self-diagnose-why-loading-fails",
+      "title": "Add an end-to-end “startup smoke test” checklist implemented as minimal, user-visible diagnostics in the UI (not automated test infrastructure): provide a single debug panel or route section that shows actor readiness, auth state, and results of a basic health/profile probe so users can self-diagnose why loading fails.",
+      "reqIds": [
+        "REQ-19"
       ],
       "version": 1
     }
@@ -214,6 +248,24 @@
     {
       "id": "AR-18",
       "summary": "Upgrade UI/UX for a polished, beautiful, production-quality trading dashboard experience across screens",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-19",
+      "summary": "Implement advanced trade management for paper/shadow/testnet modes: stop loss, take profit, trailing stop/position trailing, and post-trade analysis logs",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-20",
+      "summary": "Enforce leverage policy in risk manager and UI: configurable min 5x and max 20x with server-side validation and safety gates",
+      "reqIds": [],
+      "status": "pending"
+    },
+    {
+      "id": "AR-21",
+      "summary": "Add self-learning workflow loop for paper/shadow trading: trade/episode analysis, prioritized negative episodes, and model update orchestration (non-live)",
       "reqIds": [],
       "status": "pending"
     }

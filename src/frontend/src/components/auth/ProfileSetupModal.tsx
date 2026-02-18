@@ -27,7 +27,7 @@ export function ProfileSetupModal({ open }: ProfileSetupModalProps) {
     try {
       await saveProfile.mutateAsync({
         name: name.trim(),
-        email: email.trim() || undefined,
+        email: email.trim() || '',
         createdAt: BigInt(Date.now() * 1_000_000),
         tradingStatus: {
           binanceConnected: false,

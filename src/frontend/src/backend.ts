@@ -148,7 +148,7 @@ export interface AppHealth {
 export interface UserProfile {
     name: string;
     createdAt: bigint;
-    email?: string;
+    email: string;
     tradingStatus: TradingStatus;
 }
 export interface _CaffeineStorageRefillResult {
@@ -776,18 +776,18 @@ function from_candid_record_n18(_uploadFile: (file: ExternalBlob) => Promise<Uin
 function from_candid_record_n24(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: {
     name: string;
     createdAt: bigint;
-    email: [] | [string];
+    email: string;
     tradingStatus: _TradingStatus;
 }): {
     name: string;
     createdAt: bigint;
-    email?: string;
+    email: string;
     tradingStatus: TradingStatus;
 } {
     return {
         name: value.name,
         createdAt: value.createdAt,
-        email: record_opt_to_undefined(from_candid_opt_n15(_uploadFile, _downloadFile, value.email)),
+        email: value.email,
         tradingStatus: from_candid_TradingStatus_n25(_uploadFile, _downloadFile, value.tradingStatus)
     };
 }
@@ -946,18 +946,18 @@ function to_candid_record_n3(_uploadFile: (file: ExternalBlob) => Promise<Uint8A
 function to_candid_record_n40(_uploadFile: (file: ExternalBlob) => Promise<Uint8Array>, _downloadFile: (file: Uint8Array) => Promise<ExternalBlob>, value: {
     name: string;
     createdAt: bigint;
-    email?: string;
+    email: string;
     tradingStatus: TradingStatus;
 }): {
     name: string;
     createdAt: bigint;
-    email: [] | [string];
+    email: string;
     tradingStatus: _TradingStatus;
 } {
     return {
         name: value.name,
         createdAt: value.createdAt,
-        email: value.email ? candid_some(value.email) : candid_none(),
+        email: value.email,
         tradingStatus: to_candid_TradingStatus_n41(_uploadFile, _downloadFile, value.tradingStatus)
     };
 }

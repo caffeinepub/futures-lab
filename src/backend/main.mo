@@ -1,20 +1,18 @@
 import Text "mo:core/Text";
 import Int "mo:core/Int";
-import Nat "mo:core/Nat";
-import Map "mo:core/Map";
-import List "mo:core/List";
 import Float "mo:core/Float";
+import Map "mo:core/Map";
 import Runtime "mo:core/Runtime";
 import Principal "mo:core/Principal";
-import Iter "mo:core/Iter";
 import Time "mo:core/Time";
+import List "mo:core/List";
+import Storage "blob-storage/Storage";
+import Iter "mo:core/Iter";
 import MixinStorage "blob-storage/Mixin";
 import MixinAuthorization "authorization/MixinAuthorization";
 import AccessControl "authorization/access-control";
-import Storage "blob-storage/Storage";
 import Migration "migration";
 
-// Apply the migration in the actor's with clause
 (with migration = Migration.run)
 actor {
   // Storage and authorization mixins
@@ -58,7 +56,7 @@ actor {
   // User profiles
   public type UserProfile = {
     name : Text;
-    email : ?Text;
+    email : Text;
     createdAt : Int;
     tradingStatus : TradingStatus;
   };
@@ -179,7 +177,7 @@ actor {
   };
 
   public type CandleSummary = {
-    totalCount : Nat;
+    totalCount : Int;
     avgVolume : Float;
     totalVolume : Float;
     avgPrice : Float;
@@ -351,12 +349,6 @@ actor {
 
   public type PositionType = { #long; #short };
 
-  module Trade {
-    public func compareByProfitLoss(t1 : Trade, t2 : Trade) : { #less; #equal; #greater } {
-      Float.compare(t1.profitLoss, t2.profitLoss);
-    };
-  };
-
   let trades = Map.empty<Text, List.List<Trade>>();
 
   public shared ({ caller }) func saveTrade(tradeId : Text, trade : Trade) : async () {
@@ -404,3 +396,4 @@ actor {
     AccessControl.hasPermission(accessControlState, caller, #user);
   };
 };
+

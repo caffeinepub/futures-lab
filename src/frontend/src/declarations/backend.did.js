@@ -59,12 +59,12 @@ export const TradingStatus = IDL.Record({
 export const UserProfile = IDL.Record({
   'name' : IDL.Text,
   'createdAt' : IDL.Int,
-  'email' : IDL.Opt(IDL.Text),
+  'email' : IDL.Text,
   'tradingStatus' : TradingStatus,
 });
 export const CandleSummary = IDL.Record({
   'totalVolume' : IDL.Float64,
-  'totalCount' : IDL.Nat,
+  'totalCount' : IDL.Int,
   'avgPrice' : IDL.Float64,
   'avgVolume' : IDL.Float64,
 });
@@ -219,12 +219,12 @@ export const idlFactory = ({ IDL }) => {
   const UserProfile = IDL.Record({
     'name' : IDL.Text,
     'createdAt' : IDL.Int,
-    'email' : IDL.Opt(IDL.Text),
+    'email' : IDL.Text,
     'tradingStatus' : TradingStatus,
   });
   const CandleSummary = IDL.Record({
     'totalVolume' : IDL.Float64,
-    'totalCount' : IDL.Nat,
+    'totalCount' : IDL.Int,
     'avgPrice' : IDL.Float64,
     'avgVolume' : IDL.Float64,
   });

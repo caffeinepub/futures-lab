@@ -1,39 +1,48 @@
 import { useGetSystemHealth } from '../../lib/queries';
+import { normalizeHealthStatus } from '../../lib/canisterValueNormalizers';
+import { HealthStatus } from '../../backend';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Button } from '@/components/ui/button';
-import { AlertCircle, AlertTriangle, RefreshCw, CheckCircle } from 'lucide-react';
+import { AlertCircle, AlertTriangle, RefreshCw } from 'lucide-react';
 
 export function HealthStatusBanner() {
   const { data: health, isError, refetch } = useGetSystemHealth();
 
-  if (!health || health.status === 'healthy') {
+  if (!health) {
+    return null;
+  }
+
+  // Normalize the status to handle different runtime representations
+  const normalizedStatus = normalizeHealthStatus(health.status);
+
+  if (normalizedStatus === HealthStatus.healthy) {
     return null;
   }
 
   const getStatusConfig = () => {
-    switch (health.status) {
-      case 'degraded':
+    switch (normalizedStatus) {
+      case HealthStatus.degraded:
         return {
           icon: AlertTriangle,
           variant: 'default' as const,
           title: 'Service Degraded',
           description: health.message || 'Some features may be slower than usual.',
         };
-      case 'maintenance':
+      case HealthStatus.maintenance:
         return {
           icon: AlertCircle,
           variant: 'default' as const,
           title: 'Maintenance Mode',
           description: health.message || 'The system is currently under maintenance.',
         };
-      case 'unreachable':
+      case HealthStatus.unreachable:
         return {
           icon: AlertCircle,
           variant: 'destructive' as const,
           title: 'Service Unreachable',
           description: health.message || 'Unable to connect to the backend service.',
         };
-      case 'appIssue':
+      case HealthStatus.appIssue:
         return {
           icon: AlertCircle,
           variant: 'destructive' as const,

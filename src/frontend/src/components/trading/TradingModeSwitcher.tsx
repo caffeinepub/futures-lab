@@ -1,4 +1,5 @@
 import { useGetCallerUserProfile, useUpdateTradingMode } from '../../lib/queries';
+import { normalizeTradingMode } from '../../lib/canisterValueNormalizers';
 import { TradingMode } from '../../backend';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Label } from '@/components/ui/label';
@@ -12,10 +13,13 @@ export function TradingModeSwitcher() {
   const [showLiveConfirm, setShowLiveConfirm] = useState(false);
   const [pendingMode, setPendingMode] = useState<TradingMode | null>(null);
 
-  const currentMode = profile?.tradingStatus?.mode || TradingMode.paperTrading;
+  // Normalize the current mode to handle different runtime representations
+  const rawMode = profile?.tradingStatus?.mode;
+  const currentMode = rawMode ? normalizeTradingMode(rawMode) : TradingMode.paperTrading;
 
   const handleModeChange = (value: string) => {
-    const newMode = value as TradingMode;
+    // Normalize the incoming value as well
+    const newMode = normalizeTradingMode(value);
     
     if (newMode === TradingMode.liveTrading) {
       setPendingMode(newMode);

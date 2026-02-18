@@ -1,15 +1,12 @@
 # Specification
 
 ## Summary
-**Goal:** Resolve the app’s infinite loading issues and add production-ready Binance connectivity and trading (paper/shadow/live) with clear safety controls and reliable error/health handling.
+**Goal:** Restore reliable app startup so the UI always reaches a stable signed-out (AuthGate) or signed-in (AppLayout + route) state, with actionable error handling and basic self-diagnostics when initialization fails.
 
 **Planned changes:**
-- Fix initialization/auth/actor setup flows so the app reliably reaches either AuthGate or the main layout, with clear error states and recovery actions (retry/sign out) instead of hanging.
-- Add a route-level error boundary so runtime UI errors show a user-friendly fallback page rather than a blank/locked screen.
-- Add basic reliability/observability UX: backend health check callable from the frontend; consistent loading/empty/error states and actionable messages for all backend calls; timeouts/fallbacks to prevent infinite spinners.
-- Add Binance connection UI and backend support: store per-user API credentials with access control, support connect/disconnect, and provide “Test Connection” verification with clear status messaging.
-- Implement trading modes (paper/shadow/live) with mode selection and persistent per-user simulated portfolio for paper/shadow; live order placement gated by explicit user confirmation and disabled by default.
-- Enforce server-side safety controls for live trading (kill switch, max size/notional limits, per-user live-enabled flag) and record an auditable activity log across all modes.
-- Add Trading UI pages integrated into the sidebar: Portfolio/Positions, Orders (place/cancel), Trade History (filters), and Safety Controls; keep styling consistent with the current dashboard and responsive.
+- Fix initialization flow to prevent stuck loading/blank screen and ensure AppInitGate consistently resolves to AuthGate (signed out) or the main router (signed in), and shows the existing “Unable to Initialize” error UI with working Retry/Sign Out when init fails.
+- Resolve frontend/backend type mismatch issues for generated canister bindings (notably Motoko variant shapes) so HealthStatusBanner and TradingModeBanner/Switcher correctly interpret and compare runtime values without TypeScript or runtime rendering errors.
+- Make actor initialization resilient for non-admin users by gating admin-only initialization behind presence of an admin token, ensuring standard authenticated flows (profile, datasets, prompts) work without missing-secret failures or authorization traps.
+- Add a minimal, user-visible startup diagnostics panel/section that shows auth state, actor readiness, and latest health/profile probe results with normalized error messages, accessible without developer tools and not blocking normal operation.
 
-**User-visible outcome:** The app loads reliably with clear errors when something fails, users can connect and verify a Binance account, choose paper/shadow/live trading modes, view portfolios and history, place/cancel orders (with safety gates for live), and manage risk controls with visible activity logging.
+**User-visible outcome:** On launch, signed-out users see the AuthGate quickly (no infinite spinner), signed-in users reach the main app routes on a healthy backend, initialization failures show a clear retryable error state, and users can open a small diagnostics view to understand why startup/initialization is failing.

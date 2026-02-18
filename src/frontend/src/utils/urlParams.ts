@@ -11,25 +11,25 @@
  * @returns The parameter value if found, null otherwise
  */
 export function getUrlParameter(paramName: string): string | null {
-    // Try to get from regular query string first
-    const urlParams = new URLSearchParams(window.location.search);
-    const regularParam = urlParams.get(paramName);
+  // Try to get from regular query string first
+  const urlParams = new URLSearchParams(window.location.search);
+  const regularParam = urlParams.get(paramName);
 
-    if (regularParam !== null) {
-        return regularParam;
-    }
+  if (regularParam !== null) {
+    return regularParam;
+  }
 
-    // If not found, try to extract from hash (for hash-based routing)
-    const hash = window.location.hash;
-    const queryStartIndex = hash.indexOf('?');
+  // If not found, try to extract from hash (for hash-based routing)
+  const hash = window.location.hash;
+  const queryStartIndex = hash.indexOf('?');
 
-    if (queryStartIndex !== -1) {
-        const hashQuery = hash.substring(queryStartIndex + 1);
-        const hashParams = new URLSearchParams(hashQuery);
-        return hashParams.get(paramName);
-    }
+  if (queryStartIndex !== -1) {
+    const hashQuery = hash.substring(queryStartIndex + 1);
+    const hashParams = new URLSearchParams(hashQuery);
+    return hashParams.get(paramName);
+  }
 
-    return null;
+  return null;
 }
 
 /**
@@ -40,11 +40,11 @@ export function getUrlParameter(paramName: string): string | null {
  * @param value - The value to store
  */
 export function storeSessionParameter(key: string, value: string): void {
-    try {
-        sessionStorage.setItem(key, value);
-    } catch (error) {
-        console.warn(`Failed to store session parameter ${key}:`, error);
-    }
+  try {
+    sessionStorage.setItem(key, value);
+  } catch (error) {
+    console.warn(`Failed to store session parameter ${key}:`, error);
+  }
 }
 
 /**
@@ -54,12 +54,12 @@ export function storeSessionParameter(key: string, value: string): void {
  * @returns The stored value if found, null otherwise
  */
 export function getSessionParameter(key: string): string | null {
-    try {
-        return sessionStorage.getItem(key);
-    } catch (error) {
-        console.warn(`Failed to retrieve session parameter ${key}:`, error);
-        return null;
-    }
+  try {
+    return sessionStorage.getItem(key);
+  } catch (error) {
+    console.warn(`Failed to retrieve session parameter ${key}:`, error);
+    return null;
+  }
 }
 
 /**
@@ -71,18 +71,18 @@ export function getSessionParameter(key: string): string | null {
  * @returns The parameter value if found, null otherwise
  */
 export function getPersistedUrlParameter(paramName: string, storageKey?: string): string | null {
-    const key = storageKey || paramName;
+  const key = storageKey || paramName;
 
-    // Check URL first
-    const urlValue = getUrlParameter(paramName);
-    if (urlValue !== null) {
-        // Store in session for persistence
-        storeSessionParameter(key, urlValue);
-        return urlValue;
-    }
+  // Check URL first
+  const urlValue = getUrlParameter(paramName);
+  if (urlValue !== null) {
+    // Store in session for persistence
+    storeSessionParameter(key, urlValue);
+    return urlValue;
+  }
 
-    // Fall back to session storage
-    return getSessionParameter(key);
+  // Fall back to session storage
+  return getSessionParameter(key);
 }
 
 /**
@@ -91,118 +91,139 @@ export function getPersistedUrlParameter(paramName: string, storageKey?: string)
  * @param key - The key to remove
  */
 export function clearSessionParameter(key: string): void {
-    try {
-        sessionStorage.removeItem(key);
-    } catch (error) {
-        console.warn(`Failed to clear session parameter ${key}:`, error);
-    }
+  try {
+    sessionStorage.removeItem(key);
+  } catch (error) {
+    console.warn(`Failed to clear session parameter ${key}:`, error);
+  }
 }
 
 /**
- * Removes a specific parameter from the URL hash without reloading the page
- * Preserves route information and other parameters in the hash
+ * Removes a specific parameter from the URL without reloading the page
+ * Works with both standard query strings and hash-based routing
+ * Preserves route information and other parameters
  * Used to remove sensitive data from the address bar after extracting it
  *
- * @param paramName - The parameter to remove from the hash
- *
- * @example
- * // URL: https://app.com/#/dashboard?caffeineAdminToken=xxx&other=value
- * // After clearParamFromHash('caffeineAdminToken')
- * // URL: https://app.com/#/dashboard?other=value
+ * @param paramName - The parameter to remove
  */
-function clearParamFromHash(paramName: string): void {
-    if (!window.history.replaceState) {
-        return;
-    }
+function clearParamFromUrl(paramName: string): void {
+  if (!window.history.replaceState) {
+    return;
+  }
 
-    const hash = window.location.hash;
-    if (!hash || hash.length <= 1) {
-        return;
-    }
-
-    // Remove the leading #
-    const hashContent = hash.substring(1);
-
-    // Split route path from query string
-    const queryStartIndex = hashContent.indexOf('?');
-
-    if (queryStartIndex === -1) {
-        // No query string in hash, nothing to remove
-        return;
-    }
-
-    const routePath = hashContent.substring(0, queryStartIndex);
-    const queryString = hashContent.substring(queryStartIndex + 1);
-
-    // Parse and remove the specific parameter
-    const params = new URLSearchParams(queryString);
-    params.delete(paramName);
-
-    // Reconstruct the URL
-    const newQueryString = params.toString();
-    let newHash = routePath;
-
-    if (newQueryString) {
-        newHash += '?' + newQueryString;
-    }
-
-    // If we still have content in the hash, keep it; otherwise remove the hash entirely
-    const newUrl = window.location.pathname + window.location.search + (newHash ? '#' + newHash : '');
+  // Handle standard query string
+  const urlParams = new URLSearchParams(window.location.search);
+  if (urlParams.has(paramName)) {
+    urlParams.delete(paramName);
+    const newSearch = urlParams.toString();
+    const newUrl = window.location.pathname + (newSearch ? '?' + newSearch : '') + window.location.hash;
     window.history.replaceState(null, '', newUrl);
+    return;
+  }
+
+  // Handle hash-based routing
+  const hash = window.location.hash;
+  if (!hash || hash.length <= 1) {
+    return;
+  }
+
+  const hashContent = hash.substring(1);
+  const queryStartIndex = hashContent.indexOf('?');
+
+  if (queryStartIndex === -1) {
+    return;
+  }
+
+  const routePath = hashContent.substring(0, queryStartIndex);
+  const queryString = hashContent.substring(queryStartIndex + 1);
+
+  const params = new URLSearchParams(queryString);
+  params.delete(paramName);
+
+  const newQueryString = params.toString();
+  let newHash = routePath;
+
+  if (newQueryString) {
+    newHash += '?' + newQueryString;
+  }
+
+  const newUrl = window.location.pathname + window.location.search + (newHash ? '#' + newHash : '');
+  window.history.replaceState(null, '', newUrl);
 }
 
 /**
- * Gets a secret from the URL hash fragment only (more secure than query params)
- * Hash fragments aren't sent to servers or logged in access logs
- * The hash is immediately cleared from the URL after extraction to prevent history leakage
- *
- * Usage: https://yourapp.com/#secret=xxx
+ * Gets a secret from the URL (hash fragment, hash-route query, or standard query)
+ * Supports multiple formats for maximum compatibility:
+ * - Hash-only: https://app.com/#secret=xxx
+ * - Hash-route query: https://app.com/#/route?secret=xxx
+ * - Standard query: https://app.com/?secret=xxx
+ * 
+ * The parameter is immediately cleared from the URL after extraction to prevent history leakage
  *
  * @param paramName - The name of the secret parameter
- * @returns The secret value if found (from hash or session), null otherwise
+ * @returns The secret value if found (from URL or session), null otherwise
  */
-export function getSecretFromHash(paramName: string): string | null {
-    // Check session first to avoid unnecessary URL manipulation
-    const existingSecret = getSessionParameter(paramName);
-    if (existingSecret !== null) {
-        return existingSecret;
-    }
+export function getSecretFromUrl(paramName: string): string | null {
+  // Check session first to avoid unnecessary URL manipulation
+  const existingSecret = getSessionParameter(paramName);
+  if (existingSecret !== null) {
+    return existingSecret;
+  }
 
-    // Try to extract from hash
-    const hash = window.location.hash;
-    if (!hash || hash.length <= 1) {
-        return null;
-    }
+  // Try standard query string first
+  const urlParams = new URLSearchParams(window.location.search);
+  const standardParam = urlParams.get(paramName);
+  if (standardParam) {
+    storeSessionParameter(paramName, standardParam);
+    clearParamFromUrl(paramName);
+    return standardParam;
+  }
 
-    // Remove the leading #
+  // Try hash-based routing (e.g., #/route?secret=xxx)
+  const hash = window.location.hash;
+  if (hash && hash.length > 1) {
     const hashContent = hash.substring(1);
-    const params = new URLSearchParams(hashContent);
-    const secret = params.get(paramName);
-
-    if (secret) {
-        // Store in session for persistence
-        storeSessionParameter(paramName, secret);
-        // Immediately clear the secret parameter from URL to avoid history leakage
-        clearParamFromHash(paramName);
-        return secret;
+    const queryStartIndex = hashContent.indexOf('?');
+    
+    if (queryStartIndex !== -1) {
+      const hashQuery = hashContent.substring(queryStartIndex + 1);
+      const hashParams = new URLSearchParams(hashQuery);
+      const hashParam = hashParams.get(paramName);
+      
+      if (hashParam) {
+        storeSessionParameter(paramName, hashParam);
+        clearParamFromUrl(paramName);
+        return hashParam;
+      }
     }
 
-    return null;
+    // Try hash-only format (e.g., #secret=xxx)
+    const hashParams = new URLSearchParams(hashContent);
+    const hashOnlyParam = hashParams.get(paramName);
+    
+    if (hashOnlyParam) {
+      storeSessionParameter(paramName, hashOnlyParam);
+      clearParamFromUrl(paramName);
+      return hashOnlyParam;
+    }
+  }
+
+  return null;
 }
 
 /**
- * Gets a secret parameter with fallback chain: hash -> sessionStorage
+ * Gets a secret parameter with fallback chain: URL (any format) -> sessionStorage
  * This is the recommended way to handle sensitive parameters like admin tokens
  *
- * Security benefits over regular URL params:
- * - Hash fragments are not sent to the server
- * - Not logged in server access logs
- * - Not sent in HTTP Referer headers
+ * Security benefits:
+ * - Supports multiple URL formats for compatibility
  * - Automatically cleared from URL after extraction
+ * - Persisted in sessionStorage for the session lifetime
+ * - Not sent in HTTP Referer headers (when using hash)
  *
  * @param paramName - The name of the secret parameter
  * @returns The secret value if found, null otherwise
  */
 export function getSecretParameter(paramName: string): string | null {
-    return getSecretFromHash(paramName);
+  return getSecretFromUrl(paramName);
 }

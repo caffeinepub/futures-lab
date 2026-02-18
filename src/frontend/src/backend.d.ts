@@ -66,7 +66,7 @@ export interface AppHealth {
 export interface UserProfile {
     name: string;
     createdAt: bigint;
-    email?: string;
+    email: string;
     tradingStatus: TradingStatus;
 }
 export enum HealthStatus {

@@ -1,148 +1,107 @@
 {
   "kind": "coverage_report",
   "version": "1.0",
-  "generatedAt": "2026-02-17T17:06:16.498Z",
+  "generatedAt": "2026-02-18T10:18:37.816Z",
   "sources": {
     "buildRequest": true,
     "implementationPlan": true
   },
   "requirements": {
-    "total": 5,
-    "implemented": 5,
+    "total": 4,
+    "implemented": 4,
     "items": [
       {
-        "id": "REQ-11",
-        "summary": "Fix the app’s “stuck loading” behavior so the UI reliably progresses past initial load for both anonymous and authenticated users, with clear error states when initialization/auth/actor setup fails.",
+        "id": "REQ-16",
+        "summary": "Fix the app’s stuck-loading / blank-screen startup flow so the UI always reaches a stable state (AuthGate for signed-out users, or the main router for signed-in users) with clear, actionable error UI if initialization fails.",
         "status": "implemented",
         "plannedFiles": [
-          "frontend/src/components/system/AppInitGate.tsx",
-          "frontend/src/components/system/RouteErrorBoundary.tsx",
-          "frontend/src/hooks/useActorStatus.ts",
-          "frontend/src/App.tsx"
-        ],
-        "matchedFiles": [
-          "frontend/src/components/system/AppInitGate.tsx",
-          "frontend/src/components/system/RouteErrorBoundary.tsx",
-          "frontend/src/hooks/useActorStatus.ts",
-          "frontend/src/App.tsx"
-        ]
-      },
-      {
-        "id": "REQ-12",
-        "summary": "Implement production-grade reliability and observability basics across frontend and backend, including explicit health checks, defensive error handling, and user-visible failure feedback for all backend calls.",
-        "status": "implemented",
-        "plannedFiles": [
-          "frontend/src/lib/queryUtils.ts",
-          "frontend/src/components/system/HealthStatusBanner.tsx",
-          "frontend/src/components/system/AsyncState.tsx",
-          "frontend/src/lib/queries.ts",
-          "frontend/src/components/layout/AppLayout.tsx",
-          "frontend/src/features/datasets/DatasetsPage.tsx",
-          "frontend/src/features/prompts/PromptLibraryPage.tsx"
-        ],
-        "matchedFiles": [
-          "frontend/src/lib/queryUtils.ts",
-          "frontend/src/components/system/HealthStatusBanner.tsx",
-          "frontend/src/components/system/AsyncState.tsx",
-          "frontend/src/lib/queries.ts",
-          "frontend/src/components/layout/AppLayout.tsx",
-          "frontend/src/features/datasets/DatasetsPage.tsx",
-          "frontend/src/features/prompts/PromptLibraryPage.tsx"
-        ]
-      },
-      {
-        "id": "REQ-13",
-        "summary": "Add Binance account connectivity with API credential management, allowing a user to connect/disconnect their Binance account and verify connectivity before enabling trading.",
-        "status": "implemented",
-        "plannedFiles": [
-          "frontend/src/components/trading/BinanceConnectionCard.tsx",
-          "frontend/src/lib/queries.ts",
-          "frontend/src/features/trading/TradingSafetyControlsPage.tsx"
-        ],
-        "matchedFiles": [
-          "frontend/src/components/trading/BinanceConnectionCard.tsx",
-          "frontend/src/lib/queries.ts",
-          "frontend/src/features/trading/TradingSafetyControlsPage.tsx"
-        ]
-      },
-      {
-        "id": "REQ-14",
-        "summary": "Implement trading modes with clear separation and safety gates: paper trading, shadow trading (live market data with simulated execution), and live trading (real order placement).",
-        "status": "implemented",
-        "plannedFiles": [
-          "frontend/src/components/trading/TradingModeSwitcher.tsx",
-          "frontend/src/components/trading/LiveTradingConfirmDialog.tsx",
-          "frontend/src/components/trading/TradingModeBanner.tsx",
-          "frontend/src/lib/queries.ts",
-          "frontend/src/components/layout/AppLayout.tsx",
-          "frontend/src/features/trading/TradingHistoryPage.tsx"
-        ],
-        "matchedFiles": [
-          "frontend/src/components/trading/TradingModeSwitcher.tsx",
-          "frontend/src/components/trading/LiveTradingConfirmDialog.tsx",
-          "frontend/src/components/trading/TradingModeBanner.tsx",
-          "frontend/src/lib/queries.ts",
-          "frontend/src/components/layout/AppLayout.tsx",
-          "frontend/src/features/trading/TradingHistoryPage.tsx"
-        ]
-      },
-      {
-        "id": "REQ-15",
-        "summary": "Add core trading UI pages for production use: Portfolio/Positions, Orders, Trade History, and Safety Controls, integrated into the existing sidebar navigation and styled consistently with the current dashboard theme.",
-        "status": "implemented",
-        "plannedFiles": [
-          "frontend/src/features/trading/TradingPortfolioPage.tsx",
-          "frontend/src/features/trading/TradingOrdersPage.tsx",
-          "frontend/src/features/trading/TradingSafetyControlsPage.tsx",
           "frontend/src/App.tsx",
-          "frontend/src/components/layout/AppLayout.tsx",
-          "frontend/src/lib/queries.ts"
+          "frontend/src/hooks/useActorStatus.ts",
+          "frontend/src/components/system/AppInitGate.tsx",
+          "frontend/src/lib/queryUtils.ts"
         ],
         "matchedFiles": [
-          "frontend/src/features/trading/TradingPortfolioPage.tsx",
-          "frontend/src/features/trading/TradingOrdersPage.tsx",
-          "frontend/src/features/trading/TradingSafetyControlsPage.tsx",
           "frontend/src/App.tsx",
+          "frontend/src/hooks/useActorStatus.ts",
+          "frontend/src/components/system/AppInitGate.tsx",
+          "frontend/src/lib/queryUtils.ts"
+        ]
+      },
+      {
+        "id": "REQ-17",
+        "summary": "Resolve backend/Frontend type mismatches that can crash or break rendering (especially for Motoko variant types such as HealthStatus and TradingMode) by ensuring frontend components correctly interpret the generated canister bindings at runtime.",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/lib/canisterValueNormalizers.ts",
+          "frontend/src/components/system/HealthStatusBanner.tsx",
+          "frontend/src/components/trading/TradingModeBanner.tsx",
+          "frontend/src/components/trading/TradingModeSwitcher.tsx"
+        ],
+        "matchedFiles": [
+          "frontend/src/lib/canisterValueNormalizers.ts",
+          "frontend/src/components/system/HealthStatusBanner.tsx",
+          "frontend/src/components/trading/TradingModeBanner.tsx",
+          "frontend/src/components/trading/TradingModeSwitcher.tsx"
+        ]
+      },
+      {
+        "id": "REQ-18",
+        "summary": "Make actor initialization resilient for non-admin users so normal logins do not fail due to missing admin secrets; only perform admin-only initialization when an admin token is present, and ensure regular authenticated users can successfully pass authorization checks for standard user flows (profile, datasets, prompts).",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/utils/urlParams.ts",
+          "frontend/src/components/system/AppInitGate.tsx",
+          "frontend/src/lib/queryUtils.ts"
+        ],
+        "matchedFiles": [
+          "frontend/src/utils/urlParams.ts",
+          "frontend/src/components/system/AppInitGate.tsx",
+          "frontend/src/lib/queryUtils.ts"
+        ]
+      },
+      {
+        "id": "REQ-19",
+        "summary": "Add an end-to-end “startup smoke test” checklist implemented as minimal, user-visible diagnostics in the UI (not automated test infrastructure): provide a single debug panel or route section that shows actor readiness, auth state, and results of a basic health/profile probe so users can self-diagnose why loading fails.",
+        "status": "implemented",
+        "plannedFiles": [
+          "frontend/src/components/system/StartupDiagnosticsDialog.tsx",
           "frontend/src/components/layout/AppLayout.tsx",
-          "frontend/src/lib/queries.ts"
+          "frontend/src/components/auth/AuthGate.tsx",
+          "frontend/src/lib/queryUtils.ts"
+        ],
+        "matchedFiles": [
+          "frontend/src/components/system/StartupDiagnosticsDialog.tsx",
+          "frontend/src/components/layout/AppLayout.tsx",
+          "frontend/src/components/auth/AuthGate.tsx",
+          "frontend/src/lib/queryUtils.ts"
         ]
       }
     ]
   },
   "changedFiles": [
-    "backend/http-outcalls/outcall.mo",
     "backend/main.mo",
     "backend/migration.mo",
     "build-request.json",
-    "build-template/README.md",
-    "caffeine.lock.json",
     "feature_evidence.json",
     "frontend-file-summaries.txt",
     "frontend-implementation-plan.json",
     "frontend/src/App.tsx",
     "frontend/src/backend.d.ts",
     "frontend/src/backend.ts",
+    "frontend/src/components/auth/AuthGate.tsx",
     "frontend/src/components/auth/ProfileSetupModal.tsx",
     "frontend/src/components/layout/AppLayout.tsx",
     "frontend/src/components/system/AppInitGate.tsx",
-    "frontend/src/components/system/AsyncState.tsx",
     "frontend/src/components/system/HealthStatusBanner.tsx",
-    "frontend/src/components/system/RouteErrorBoundary.tsx",
-    "frontend/src/components/trading/BinanceConnectionCard.tsx",
-    "frontend/src/components/trading/LiveTradingConfirmDialog.tsx",
+    "frontend/src/components/system/StartupDiagnosticsDialog.tsx",
     "frontend/src/components/trading/TradingModeBanner.tsx",
     "frontend/src/components/trading/TradingModeSwitcher.tsx",
     "frontend/src/declarations/backend.did.d.ts",
     "frontend/src/declarations/backend.did.js",
-    "frontend/src/features/datasets/DatasetsPage.tsx",
-    "frontend/src/features/prompts/PromptLibraryPage.tsx",
-    "frontend/src/features/trading/TradingHistoryPage.tsx",
-    "frontend/src/features/trading/TradingOrdersPage.tsx",
-    "frontend/src/features/trading/TradingPortfolioPage.tsx",
-    "frontend/src/features/trading/TradingSafetyControlsPage.tsx",
     "frontend/src/hooks/useActorStatus.ts",
-    "frontend/src/lib/queries.ts",
+    "frontend/src/lib/canisterValueNormalizers.ts",
     "frontend/src/lib/queryUtils.ts",
+    "frontend/src/utils/urlParams.ts",
     "project_state.json",
     "scratch/component-selection.json",
     "spec.md",

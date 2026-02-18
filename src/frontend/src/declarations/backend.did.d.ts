@@ -73,7 +73,7 @@ export interface TradingStatus {
 export interface UserProfile {
   'name' : string,
   'createdAt' : bigint,
-  'email' : [] | [string],
+  'email' : string,
   'tradingStatus' : TradingStatus,
 }
 export type UserRole = { 'admin' : null } |

@@ -1,3 +1,4 @@
+import { useEffect, useState } from 'react';
 import { useInternetIdentity } from './hooks/useInternetIdentity';
 import { useGetCallerUserProfile } from './lib/queries';
 import { AuthGate } from './components/auth/AuthGate';
@@ -127,16 +128,32 @@ declare module '@tanstack/react-router' {
   }
 }
 
+const INIT_TIMEOUT = 3000; // 3 seconds for initialization
+
 export default function App() {
   const { identity, isInitializing } = useInternetIdentity();
   const { data: userProfile, isLoading: profileLoading, isFetched } = useGetCallerUserProfile();
+  const [initTimedOut, setInitTimedOut] = useState(false);
 
   const isAuthenticated = !!identity;
+
+  // Time-bounded initialization: if initialization takes too long, show stable UI
+  useEffect(() => {
+    if (isInitializing) {
+      const timer = setTimeout(() => {
+        setInitTimedOut(true);
+      }, INIT_TIMEOUT);
+      return () => clearTimeout(timer);
+    } else {
+      setInitTimedOut(false);
+    }
+  }, [isInitializing]);
 
   // Show profile setup modal only after auth and profile fetch is complete
   const showProfileSetup = isAuthenticated && !profileLoading && isFetched && userProfile === null;
 
-  if (isInitializing) {
+  // If initialization is taking too long, render stable UI based on auth state
+  if (isInitializing && !initTimedOut) {
     return (
       <div className="flex h-screen items-center justify-center bg-background">
         <div className="text-center">
